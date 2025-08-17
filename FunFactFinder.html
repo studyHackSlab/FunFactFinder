@@ -201,6 +201,45 @@
             border-color: #EF5350;
         }
 
+        /* 正解・不正解のラベルを追加 */
+        .choice-btn.correct::after {
+            content: '正解！';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: white;
+            padding: 5px 10px;
+            background-color: var(--color-correct);
+            border-radius: 5px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .choice-btn.incorrect::after {
+            content: '不正解';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: white;
+            padding: 5px 10px;
+            background-color: var(--color-incorrect);
+            border-radius: 5px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
         .choice-btn:disabled {
             cursor: not-allowed;
         }
@@ -229,6 +268,21 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        .explanation p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .explanation-correct {
+            color: var(--color-correct);
+            font-weight: bold;
+        }
+
+        .explanation-incorrect {
+            color: var(--color-incorrect);
+            font-weight: bold;
         }
 
         .next-btn {
@@ -418,7 +472,7 @@
 
             <div id="explanation" class="explanation">
                 <h4>解説</h4>
-                <p id="explanation-text"></p>
+                <div id="explanation-text"></div>
             </div>
 
             <button id="next-btn" class="next-btn">次の問題へ</button>
@@ -648,7 +702,7 @@
                 question: "植物が光を使って自分で栄養をつくるはたらきを何という？",
                 choicesData: [
                     { choice: "呼吸", explanation: "植物も動物と同じように呼吸をしますが、これはエネルギーを得るためのものです。" },
-                    { choice: "消化", explanation: "食べ物を分解して栄養を吸収するはたらきで、植物が自分で栄養をつくるときには使いません。" },
+                    { choice: "消化", explanation: "食べ物を分解して栄養を吸収するはたらきで、植物が自分で栄養をつくるには使いません。" },
                     { choice: "光合成", explanation: "光のエネルギーを使って、二酸化炭素と水からブドウ糖（栄養）をつくるはたらきです。" },
                     { choice: "発酵", explanation: "微生物が糖を分解してアルコールや乳酸などをつくるはたらきです。" }
                 ],
@@ -790,102 +844,6 @@
             {
                 difficulty: "初級",
                 targetAudience: "小学生",
-                question: "100円玉を5枚、50円玉を2枚持っています。全部でいくら？",
-                choicesData: [
-                    { choice: "550円", explanation: "500円と50円の合計です。" },
-                    { choice: "600円", explanation: "100円玉5枚で500円、50円玉2枚で100円、合計600円になります。" },
-                    { choice: "750円", explanation: "これは100円玉7枚と50円玉1枚の合計です。" },
-                    { choice: "1,000円", explanation: "100円玉が10枚の場合の金額です。" }
-                ],
-                correctAnswer: "600円"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "信号機の色で、「止まれ」を表す色はどれ？",
-                choicesData: [
-                    { choice: "黄色", explanation: "「注意」や「止まれ」の意味ですが、赤色が基本的な「止まれ」の色です。" },
-                    { choice: "青色", explanation: "「進め」を表す色です。" },
-                    { choice: "赤色", explanation: "車の信号機や踏切の信号機では、「止まれ」を表す色です。" },
-                    { choice: "緑色", explanation: "日本の信号機では青色と表示されていますが、実際の光は緑色に近いです。" }
-                ],
-                correctAnswer: "赤色"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "地球で最も多い気体はどれ？",
-                choicesData: [
-                    { choice: "酸素", explanation: "人間が呼吸に使う大切な気体ですが、一番多くはありません。" },
-                    { choice: "二酸化炭素", explanation: "地球温暖化の原因の一つですが、ほんの少ししかありません。" },
-                    { choice: "窒素", explanation: "地球の空気の中で、最も多く含まれている気体です。" },
-                    { choice: "水素", explanation: "宇宙で一番多い気体ですが、地球の空気にはほとんど含まれません。" }
-                ],
-                correctAnswer: "窒素"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "「春はあけぼの」で始まる、平安時代の文学作品は何？",
-                choicesData: [
-                    { choice: "源氏物語", explanation: "紫式部が書いた、世界で最も古い長編小説と言われています。" },
-                    { choice: "枕草子", explanation: "清少納言が書いた、身の回りのことを記した随筆です。" },
-                    { choice: "土佐日記", explanation: "紀貫之が書いた、旅の日記です。" },
-                    { choice: "徒然草", explanation: "兼好法師が書いた、人生や世の中について書かれた随筆です。" }
-                ],
-                correctAnswer: "枕草子"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "1000mは何km？",
-                choicesData: [
-                    { choice: "1km", explanation: "1000mは1kmです。" },
-                    { choice: "10km", explanation: "1万mのことです。" },
-                    { choice: "100km", explanation: "10万mのことです。" },
-                    { choice: "1,000km", explanation: "100万mのことです。" }
-                ],
-                correctAnswer: "1km"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "日本の伝統的な遊びで、紙を折って様々な形をつくる遊びは何？",
-                choicesData: [
-                    { choice: "剣玉", explanation: "木でできた玉と棒を使う遊びです。" },
-                    { choice: "だるま落とし", explanation: "積み重ねた木片を叩いて落とす遊びです。" },
-                    { choice: "折り紙", explanation: "紙を折って、動物や植物などの形をつくる遊びです。" },
-                    { choice: "お手玉", explanation: "小さな袋を投げて遊ぶ遊びです。" }
-                ],
-                correctAnswer: "折り紙"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "カレンダーで、1年は何ヶ月ある？",
-                choicesData: [
-                    { choice: "10ヶ月", explanation: "これは1年ではありません。" },
-                    { choice: "11ヶ月", explanation: "これも1年ではありません。" },
-                    { choice: "12ヶ月", explanation: "1年は12ヶ月あります。" },
-                    { choice: "13ヶ月", explanation: "これも1年ではありません。" }
-                ],
-                correctAnswer: "12ヶ月"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
-                question: "体が緑色で、細長い体で草むらにいる昆虫は何？",
-                choicesData: [
-                    { choice: "カブトムシ", explanation: "黒くて大きな角を持つ昆虫です。" },
-                    { choice: "トンボ", explanation: "細長い体ですが、色や姿は異なります。" },
-                    { choice: "バッタ", explanation: "緑色や茶色で、ぴょんぴょん跳ねる昆虫です。" },
-                    { choice: "クワガタ", explanation: "大きなあごを持つ昆虫です。" }
-                ],
-                correctAnswer: "バッタ"
-            },
-            {
-                difficulty: "初級",
-                targetAudience: "小学生",
                 question: "10000円札に描かれている人物は誰？",
                 choicesData: [
                     { choice: "福沢諭吉", explanation: "現在の10000円札に描かれている人物です。" },
@@ -972,6 +930,7 @@
                 updateStartButton();
             });
         });
+
         function updateStartButton() {
             if (gameState.questionCount && gameState.difficulty && gameState.targetAudience) {
                 startBtn.disabled = false;
@@ -982,6 +941,7 @@
 
         // クイズ開始
         startBtn.addEventListener('click', startQuiz);
+
         function startQuiz() {
             // 条件に合う問題を選択
             let availableQuestions = quizzes.filter(q =>
@@ -1058,7 +1018,8 @@
             const currentQuestion = gameState.selectedQuestions[gameState.currentQuestionIndex];
             const isCorrect = selectedChoice === currentQuestion.correctAnswer;
 
-            currentQuestion.userAnswer = selectedChoice; // ユーザーの回答を保存
+            // ユーザーの回答を保存
+            currentQuestion.userAnswer = selectedChoice;
 
             if (isCorrect) {
                 gameState.score++;
@@ -1080,15 +1041,26 @@
                 btn.disabled = true;
             });
 
-            // すべての選択肢の解説を表示
-            const explanationText = document.getElementById('explanation-text');
-            explanationText.innerHTML = ''; // 既存の解説をクリア
-            // シャッフルされた順番で解説を表示
+            // 解説を表示
+            const explanationContainer = document.getElementById('explanation-text');
+            explanationContainer.innerHTML = ''; // 既存の解説をクリア
+
+            // シャッフルされた順番で解説を動的に生成
             currentQuestion.shuffledChoicesData.forEach(item => {
                 const p = document.createElement('p');
-                p.innerHTML = `<strong>${item.choice}</strong>: ${item.explanation}`;
-                explanationText.appendChild(p);
+                let content = `<strong>${item.choice}</strong>: ${item.explanation}`;
+
+                // 正解とユーザーの回答に色を付ける
+                if (item.choice === currentQuestion.correctAnswer) {
+                    p.classList.add('explanation-correct');
+                } else if (item.choice === selectedChoice) {
+                    p.classList.add('explanation-incorrect');
+                }
+
+                p.innerHTML = content;
+                explanationContainer.appendChild(p);
             });
+
             document.getElementById('explanation').classList.add('show');
 
             // 次へボタンを表示
