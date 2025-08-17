@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自立促進クイズ</title>
+    <style>
+        :root {
+            --color-1: #4d1919;
+            --color-2: #783a3a;
+            --color-3: #b95b3c;
+            --color-4: #d67f4c;
+            --color-5: #f4caa9;
+            --color-correct: #4CAF50;
+            --color-incorrect: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--color-1), var(--color-2));
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .setup-screen {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .setup-section {
+            margin-bottom: 30px;
+        }
+
+        .setup-section h3 {
+            margin-bottom: 15px;
+            color: var(--color-5);
+            font-size: 1.3rem;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: var(--color-3);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .option-btn:hover {
+            background: var(--color-4);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background: var(--color-4);
+            border-color: var(--color-5);
+            box-shadow: 0 4px 15px rgba(212, 127, 76, 0.4);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, var(--color-3), var(--color-4));
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quiz-screen {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--color-4), var(--color-5));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .question-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--color-5);
+        }
+
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .choices {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .choice-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 2px solid var(--color-3);
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .choice-btn.selected {
+            background: var(--color-3);
+            border-color: var(--color-4);
+        }
+
+        .choice-btn.correct {
+            background: var(--color-correct);
+            border-color: #66BB6A;
+        }
+
+        .choice-btn.incorrect {
+            background: var(--color-incorrect);
+            border-color: #EF5350;
+        }
+
+        .choice-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .explanation {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--color-4);
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .next-btn {
+            background: var(--color-4);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: none;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .next-btn:hover {
+            background: var(--color-3);
+            transform: translateY(-2px);
+        }
+
+        .result-screen {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--color-5);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .review-section {
+            text-align: left;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed rgba(255, 255, 255, 0.5);
+        }
+
+        .review-section h3 {
+            font-size: 1.5rem;
+            color: var(--color-5);
+            margin-bottom: 20px;
+        }
+
+        .review-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .review-item h4 {
+            color: var(--color-5);
+            margin-bottom: 10px;
+        }
+
+        .review-explanation p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .correct-answer-text {
+            color: var(--color-correct);
+            font-weight: bold;
+        }
+
+        .user-answer-text {
+            color: var(--color-incorrect);
+            font-weight: bold;
+        }
+
+        .correct-user-answer-text {
+            color: var(--color-correct);
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, var(--color-2), var(--color-3));
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .setup-screen,
+            .quiz-screen,
+            .result-screen {
+                padding: 20px;
+            }
+
+            .option-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>自立促進クイズ</h1>
+            <p>知識を身につけて、自立への一歩を踏み出そう</p>
+        </div>
+
+        <div id="setup-screen" class="setup-screen">
+            <div class="setup-section">
+                <h3>問題数を選択</h3>
+                <div class="option-grid">
+                    <button class="option-btn" data-type="questions" data-value="10">10問</button>
+                    <button class="option-btn" data-type="questions" data-value="20">20問</button>
+                    <button class="option-btn" data-type="questions" data-value="30">30問</button>
+                    <button class="option-btn" data-type="questions" data-value="40">40問</button>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>難易度を選択</h3>
+                <div class="option-grid">
+                    <button class="option-btn" data-type="difficulty" data-value="初級">初級</button>
+                    <button class="option-btn" data-type="difficulty" data-value="中級">中級</button>
+                    <button class="option-btn" data-type="difficulty" data-value="上級">上級</button>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>対象者を選択</h3>
+                <div class="option-grid">
+                    <button class="option-btn" data-type="target" data-value="小学生">小学生</button>
+                    <button class="option-btn" data-type="target" data-value="中学生">中学生</button>
+                    <button class="option-btn" data-type="target" data-value="一般成人">一般成人</button>
+                </div>
+            </div>
+
+            <button id="start-btn" class="start-btn" disabled>クイズを開始する</button>
+        </div>
+
+        <div id="quiz-screen" class="quiz-screen hidden">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <div class="question-info">
+                <span id="question-number">問題 1</span>
+                <span id="question-total">/ 10</span>
+            </div>
+
+            <div id="question" class="question"></div>
+
+            <div id="choices" class="choices"></div>
+
+            <div id="explanation" class="explanation">
+                <h4>解説</h4>
+                <p id="explanation-text"></p>
+            </div>
+
+            <button id="next-btn" class="next-btn">次の問題へ</button>
+        </div>
+
+        <div id="result-screen" class="result-screen hidden">
+            <div id="result-score" class="result-score"></div>
+            <div id="result-message" class="result-message"></div>
+
+            <div id="review-section" class="review-section hidden">
+                <h3>間違えた問題の復習</h3>
+            </div>
+            <button id="restart-btn" class="restart-btn">もう一度挑戦する</button>
+        </div>
+    </div>
+
+    <script>
+        // 問題データ
+        const quizzes = [
+            // --- 初級・小学生向けの問題（既存） ---
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 1,
+                question: "日本でいちばん高い山はどれ？",
+                choicesData: [
+                    { choice: "富士山", explanation: "日本でいちばん高い山です。" },
+                    { choice: "筑波山", explanation: "茨城県にある山で、「西の富士、東の筑波」と呼ばれますが、富士山よりずっと低いです。" },
+                    { choice: "槍ヶ岳", explanation: "日本アルプスにある、槍のような形をした有名な山ですが、富士山より低いです。" },
+                    { choice: "白山", explanation: "石川県、福井県、岐阜県にまたがる山ですが、富士山より低いです。" }
+                ],
+                correctAnswer: "富士山"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 2,
+                question: "地球の中心にある太陽が、東から西へ動いて見えるのはどうして？",
+                choicesData: [
+                    { choice: "地球が自転しているから", explanation: "地球が西から東へクルクル回っているため、太陽は東から西へ動いて見えるのです。" },
+                    { choice: "太陽が地球の周りを回っているから", explanation: "昔はそう考えられていましたが、実際は地球が太陽の周りを回っています。" },
+                    { choice: "月が太陽をひっぱっているから", explanation: "月は地球の周りを回っていて、太陽の動きには関係ありません。" },
+                    { choice: "太陽が自転しているから", explanation: "太陽も回っていますが、これが原因で太陽が動いて見えるわけではありません。" }
+                ],
+                correctAnswer: "地球が自転しているから"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 3,
+                question: "日本でいちばん古い歴史を持つ、お侍さんが活躍した時代はどれ？",
+                choicesData: [
+                    { choice: "鎌倉時代", explanation: "源頼朝が鎌倉幕府を開き、お侍さんたちが政治の中心になった最初の時代です。" },
+                    { choice: "江戸時代", explanation: "徳川家康が江戸幕府を開いた、比較的最近の時代です。" },
+                    { choice: "奈良時代", explanation: "天皇が政治の中心だった時代で、大仏がつくられました。" },
+                    { choice: "明治時代", explanation: "鎖国が終わり、日本が外国の文化をたくさん取り入れた時代です。" }
+                ],
+                correctAnswer: "鎌倉時代"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 4,
+                question: "次の言葉の中で、動物の鳴き声を表す「擬音語（ぎおんご）」はどれ？",
+                choicesData: [
+                    { choice: "キラキラ", explanation: "光がかがやく様子を表す言葉です。" },
+                    { choice: "ニコニコ", explanation: "笑顔の様子を表す言葉です。" },
+                    { choice: "ワンワン", explanation: "犬の鳴き声を表す擬音語です。" },
+                    { choice: "フワフワ", explanation: "柔らかい様子や、軽やかに動く様子を表す言葉です。" }
+                ],
+                correctAnswer: "ワンワン"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 5,
+                question: "1ダースは鉛筆何本のこと？",
+                choicesData: [
+                    { choice: "6本", explanation: "1ダースの半分です。" },
+                    { choice: "10本", explanation: "鉛筆を数えるときに使う、よくある数ですが、ダースではありません。" },
+                    { choice: "12本", explanation: "1ダースは12個のことを表します。" },
+                    { choice: "20本", explanation: "1ダースより多い数です。" }
+                ],
+                correctAnswer: "12本"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 6,
+                question: "日本の学校の授業では、何時から何時までを「給食の時間」とすることが多い？",
+                choicesData: [
+                    { choice: "午前10時から11時", explanation: "2時間目や3時間目の時間です。" },
+                    { choice: "午前11時から正午", explanation: "4時間目の終わり頃です。" },
+                    { choice: "正午から午後1時", explanation: "小学校では、この時間帯に給食を食べるのが一般的です。" },
+                    { choice: "午後2時から3時", explanation: "掃除や5時間目、6時間目の時間です。" }
+                ],
+                correctAnswer: "正午から午後1時"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 7,
+                question: "魚はエラを使って、何を取り込んで息をしている？",
+                choicesData: [
+                    { choice: "空気", explanation: "魚は空気中では息ができません。" },
+                    { choice: "酸素", explanation: "魚は、水の中にとけている酸素をエラで取り込んで息をしています。" },
+                    { choice: "二酸化炭素", explanation: "人間が吐き出す気体で、魚は息をするときに取り込みません。" },
+                    { choice: "水素", explanation: "物質の一つで、魚の呼吸には関係ありません。" }
+                ],
+                correctAnswer: "酸素"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 8,
+                question: "運動会で使う「紅白」の旗。日本の国旗の赤色は何を表している？",
+                choicesData: [
+                    { choice: "海", explanation: "日本の周りには海がたくさんありますが、国旗の赤色は海を表しません。" },
+                    { choice: "太陽", explanation: "国旗の中央にある赤い丸は、太陽を表しています。" },
+                    { choice: "月", explanation: "月は国旗には描かれていません。" },
+                    { choice: "星", explanation: "星は国旗には描かれていません。" }
+                ],
+                correctAnswer: "太陽"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 9,
+                question: "500円玉を3枚と、100円玉を2枚持っています。ぜんぶでいくら？",
+                choicesData: [
+                    { choice: "600円", explanation: "100円玉が6枚の場合の金額です。" },
+                    { choice: "700円", explanation: "500円玉が1枚と100円玉が2枚の場合の金額です。" },
+                    { choice: "1,600円", explanation: "500円玉が3枚で1,500円、100円玉が2枚で200円、合計1,700円になります。" },
+                    { choice: "1,700円", explanation: "500円 × 3枚 = 1,500円、100円 × 2枚 = 200円。これらをたすと1,700円になります。" }
+                ],
+                correctAnswer: "1,700円"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                questionNumber: 10,
+                question: "ご飯やお菓子を食べるときに、口の中ではたらく、食べ物を細かくするはたらきをするものは何？",
+                choicesData: [
+                    { choice: "胃", explanation: "胃は食べ物を消化する場所ですが、細かくするのは歯の役割です。" },
+                    { choice: "歯", explanation: "歯は食べ物をかみ砕いて細かくする重要な役割を果たします。" },
+                    { choice: "舌", explanation: "舌は食べ物を味わったり、飲み込む手助けをしますが、細かくはしません。" },
+                    { choice: "のど", explanation: "のどは食べ物を胃に送る通り道です。" }
+                ],
+                correctAnswer: "歯"
+            },
+            // --- 中級・小学生向けの問題（既存） ---
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "日本で、いちばん面積が大きい都道府県はどこ？",
+                choicesData: [
+                    { choice: "北海道", explanation: "日本の都道府県の中で、最も面積が広いです。" },
+                    { choice: "岩手県", explanation: "本州では最も面積が広いですが、日本全体では北海道より小さいです。" },
+                    { choice: "東京都", explanation: "面積は小さいですが、人口が最も多い都道府県です。" },
+                    { choice: "埼玉県", explanation: "面積は比較的小さく、人口も多い都道府県です。" }
+                ],
+                correctAnswer: "北海道"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "月が、地球のまわりを一周するのにかかる時間は、およそどれくらい？",
+                choicesData: [
+                    { choice: "1日", explanation: "地球が自転するのにかかる時間です。" },
+                    { choice: "1週間", explanation: "月の満ち欠けの約4分の1の期間です。" },
+                    { choice: "1ヶ月", explanation: "月はおよそ27日かけて地球の周りを一周します。満ち欠けの周期はおよそ29.5日です。" },
+                    { choice: "1年", explanation: "地球が太陽の周りを一周するのにかかる時間です。" }
+                ],
+                correctAnswer: "1ヶ月"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "奈良の大仏をつくったとされる人物は誰？",
+                choicesData: [
+                    { choice: "聖徳太子", explanation: "仏教を日本に広めた人物として知られています。" },
+                    { choice: "織田信長", explanation: "戦国時代に活躍した武将です。" },
+                    { choice: "徳川家康", explanation: "江戸幕府を開いた人物です。" },
+                    { choice: "聖武天皇", explanation: "仏教の力で国を治めようと考え、東大寺に大仏をつくらせました。" }
+                ],
+                correctAnswer: "聖武天皇"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "「馬の耳に念仏」と同じ意味のことわざはどれ？",
+                choicesData: [
+                    { choice: "猿も木から落ちる", explanation: "どんなに上手な人でも、失敗することがあるという意味です。" },
+                    { choice: "猫に小判", explanation: "価値が分からない人に高価なものを与えても、役に立たないという意味です。" },
+                    { choice: "石の上にも三年", explanation: "辛いことでも我慢すれば、いつか報われるという意味です。" },
+                    { choice: "蛙の子は蛙", explanation: "子どもは親に似るという意味です。" }
+                ],
+                correctAnswer: "猫に小判"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "1辺が5cmの正方形の面積は何平方センチメートル？",
+                choicesData: [
+                    { choice: "10㎠", explanation: "1辺の長さの2倍です。面積は「たて×よこ」で計算します。" },
+                    { choice: "20㎠", explanation: "1辺の長さの4倍です。周りの長さは20cmです。" },
+                    { choice: "25㎠", explanation: "5cm × 5cm = 25㎠で、これが正方形の面積の計算方法です。" },
+                    { choice: "30㎠", explanation: "正方形の面積としては正しくありません。" }
+                ],
+                correctAnswer: "25㎠"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "交通事故を防ぐために、道路を渡るときに最初にするべきことは何？",
+                choicesData: [
+                    { choice: "走って渡る", explanation: "転ぶ危険や、車から見えにくくなる危険があります。" },
+                    { choice: "携帯電話を見る", explanation: "「歩きスマホ」は周りの状況が見えなくなるため、大変危険です。" },
+                    { choice: "止まって左右を確認する", explanation: "道路を渡る前に、車や自転車が来ていないか、必ず安全確認をすることが最も重要です。" },
+                    { choice: "信号が変わるまで待つ", explanation: "信号が青になってから渡るべきですが、その前にも左右の確認は必要です。" }
+                ],
+                correctAnswer: "止まって左右を確認する"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "植物が光を使って自分で栄養をつくるはたらきを何という？",
+                choicesData: [
+                    { choice: "呼吸", explanation: "植物も動物と同じように呼吸をしますが、これはエネルギーを得るためのものです。" },
+                    { choice: "消化", explanation: "食べ物を分解して栄養を吸収するはたらきで、植物が自分で栄養をつくるときには使いません。" },
+                    { choice: "光合成", explanation: "光のエネルギーを使って、二酸化炭素と水からブドウ糖（栄養）をつくるはたらきです。" },
+                    { choice: "発酵", explanation: "微生物が糖を分解してアルコールや乳酸などをつくるはたらきです。" }
+                ],
+                correctAnswer: "光合成"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "日本の4つの大きな島のうち、最も南にある島はどれ？",
+                choicesData: [
+                    { choice: "北海道", explanation: "最も北に位置する島です。" },
+                    { choice: "本州", explanation: "日本で最も大きな島です。" },
+                    { choice: "四国", explanation: "本州の南西に位置する島です。" },
+                    { choice: "九州", explanation: "4つの大きな島の中で最も南に位置しています。沖縄はさらに南ですが、この問題では4つの大きな島が対象です。" }
+                ],
+                correctAnswer: "九州"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "120円のお菓子を3個買うと、合計でいくら？",
+                choicesData: [
+                    { choice: "240円", explanation: "120円のお菓子2個の値段です。" },
+                    { choice: "360円", explanation: "120円 × 3個 = 360円となり、これが正しい計算です。" },
+                    { choice: "480円", explanation: "120円のお菓子4個の値段です。" },
+                    { choice: "1,200円", explanation: "120円のお菓子10個の値段です。" }
+                ],
+                correctAnswer: "360円"
+            },
+            {
+                difficulty: "中級",
+                targetAudience: "小学生",
+                question: "食べ物を無駄にしないために、買い物に行く前にするべきことは何？",
+                choicesData: [
+                    { choice: "食べたいものをたくさん考える", explanation: "これだけでは無駄が出てしまう可能性があります。" },
+                    { choice: "安いお店を探す", explanation: "安いからといって必要ないものまで買ってしまうと、無駄になることがあります。" },
+                    { choice: "冷蔵庫の中をチェックして、必要なものだけをメモする", explanation: "すでに家にあるものを重複して買わないようにすることで、食べ物の無駄を減らせます。" },
+                    { choice: "新しいレシピを探す", explanation: "新しいレシピは良いですが、それが家にある食材と合わないと無駄になります。" }
+                ],
+                correctAnswer: "冷蔵庫の中をチェックして、必要なものだけをメモする"
+            },
+            // --- ここから新しい問題（初級・小学生向け） ---
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "日本でいちばん面積が小さい都道府県はどこ？",
+                choicesData: [
+                    { choice: "鳥取県", explanation: "面積は小さいですが、一番ではありません。" },
+                    { choice: "香川県", explanation: "四国にある県で、日本の都道府県で最も面積が小さいです。" },
+                    { choice: "大阪府", explanation: "面積は小さいですが、香川県よりは大きいです。" },
+                    { choice: "沖縄県", explanation: "日本で一番南にある県ですが、面積は一番小さくありません。" }
+                ],
+                correctAnswer: "香川県"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "空にうかぶ雲は、何が集まってできている？",
+                choicesData: [
+                    { choice: "砂", explanation: "砂は重いので空に浮かぶことはありません。" },
+                    { choice: "水", explanation: "空に浮かぶのは、とても小さな水のつぶや氷のつぶです。" },
+                    { choice: "油", explanation: "油は水よりも軽いため、水と混ざることはありません。" },
+                    { choice: "けむり", explanation: "けむりは燃えかすなどで、雲とは違います。" }
+                ],
+                correctAnswer: "水"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "日本の学校で、みんなで一緒にご飯を食べる時間のことを何という？",
+                choicesData: [
+                    { choice: "朝ごはん", explanation: "朝に家で食べるご飯のことです。" },
+                    { choice: "給食", explanation: "学校で、みんなで一緒に食べるご飯のことです。" },
+                    { choice: "夜ごはん", explanation: "夜に家で食べるご飯のことです。" },
+                    { choice: "おやつ", explanation: "食事と食事の間に食べる軽食のことです。" }
+                ],
+                correctAnswer: "給食"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "一週間は何日ある？",
+                choicesData: [
+                    { choice: "5日", explanation: "これは平日の日数です。" },
+                    { choice: "6日", explanation: "これは一週間の日数ではありません。" },
+                    { choice: "7日", explanation: "月曜日から日曜日まで、一週間は7日あります。" },
+                    { choice: "10日", explanation: "これは十日（とおか）のことです。" }
+                ],
+                correctAnswer: "7日"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "「にんじん」は、体のどの部分を食べる野菜？",
+                choicesData: [
+                    { choice: "葉っぱ", explanation: "にんじんの葉っぱは食べられますが、普段食べているのは別の部分です。" },
+                    { choice: "茎", explanation: "茎を食べる野菜もありますが、にんじんではありません。" },
+                    { choice: "実", explanation: "トマトやキュウリのように、実を食べる野菜ではありません。" },
+                    { choice: "根っこ", explanation: "にんじんは、土の中にできる太い根っこを食べています。" }
+                ],
+                correctAnswer: "根っこ"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "「はしを渡る」という言葉で、使われているものは何？",
+                choicesData: [
+                    { choice: "おはし", explanation: "ご飯を食べるときに使うものです。" },
+                    { choice: "はしご", explanation: "高いところに登るときに使うものです。" },
+                    { choice: "橋", explanation: "川や谷を越えるためにかけられた道のことです。" },
+                    { choice: "箸置き", explanation: "箸を置くためのものです。" }
+                ],
+                correctAnswer: "橋"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "世界で一番大きな大陸はどこ？",
+                choicesData: [
+                    { choice: "南極大陸", explanation: "とても寒い大陸ですが、一番大きな大陸ではありません。" },
+                    { choice: "アフリカ大陸", explanation: "世界で二番目に大きな大陸です。" },
+                    { choice: "ユーラシア大陸", explanation: "アジアとヨーロッパが一つになった大陸で、世界で一番大きいです。" },
+                    { choice: "北アメリカ大陸", explanation: "カナダやアメリカがある大陸です。" }
+                ],
+                correctAnswer: "ユーラシア大陸"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "日本の昔話「桃太郎」で、桃太郎が鬼退治に連れて行った動物は、犬、猿とあと一つは何？",
+                choicesData: [
+                    { choice: "キジ", explanation: "桃太郎と一緒に鬼ヶ島へ行ったのは、犬、猿、キジの3匹です。" },
+                    { choice: "うさぎ", explanation: "昔話に登場する動物ですが、桃太郎の仲間ではありません。" },
+                    { choice: "クマ", explanation: "日本の動物ですが、桃太郎の仲間ではありません。" },
+                    { choice: "カニ", explanation: "「さるかに合戦」という別の昔話に出てきます。" }
+                ],
+                correctAnswer: "キジ"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "100円玉を5枚、50円玉を2枚持っています。全部でいくら？",
+                choicesData: [
+                    { choice: "550円", explanation: "500円と50円の合計です。" },
+                    { choice: "600円", explanation: "100円玉5枚で500円、50円玉2枚で100円、合計600円になります。" },
+                    { choice: "750円", explanation: "これは100円玉7枚と50円玉1枚の合計です。" },
+                    { choice: "1,000円", explanation: "100円玉が10枚の場合の金額です。" }
+                ],
+                correctAnswer: "600円"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "信号機の色で、「止まれ」を表す色はどれ？",
+                choicesData: [
+                    { choice: "黄色", explanation: "「注意」や「止まれ」の意味ですが、赤色が基本的な「止まれ」の色です。" },
+                    { choice: "青色", explanation: "「進め」を表す色です。" },
+                    { choice: "赤色", explanation: "車の信号機や踏切の信号機では、「止まれ」を表す色です。" },
+                    { choice: "緑色", explanation: "日本の信号機では青色と表示されていますが、実際の光は緑色に近いです。" }
+                ],
+                correctAnswer: "赤色"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "地球で最も多い気体はどれ？",
+                choicesData: [
+                    { choice: "酸素", explanation: "人間が呼吸に使う大切な気体ですが、一番多くはありません。" },
+                    { choice: "二酸化炭素", explanation: "地球温暖化の原因の一つですが、ほんの少ししかありません。" },
+                    { choice: "窒素", explanation: "地球の空気の中で、最も多く含まれている気体です。" },
+                    { choice: "水素", explanation: "宇宙で一番多い気体ですが、地球の空気にはほとんど含まれません。" }
+                ],
+                correctAnswer: "窒素"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "「春はあけぼの」で始まる、平安時代の文学作品は何？",
+                choicesData: [
+                    { choice: "源氏物語", explanation: "紫式部が書いた、世界で最も古い長編小説と言われています。" },
+                    { choice: "枕草子", explanation: "清少納言が書いた、身の回りのことを記した随筆です。" },
+                    { choice: "土佐日記", explanation: "紀貫之が書いた、旅の日記です。" },
+                    { choice: "徒然草", explanation: "兼好法師が書いた、人生や世の中について書かれた随筆です。" }
+                ],
+                correctAnswer: "枕草子"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "1000mは何km？",
+                choicesData: [
+                    { choice: "1km", explanation: "1000mは1kmです。" },
+                    { choice: "10km", explanation: "1万mのことです。" },
+                    { choice: "100km", explanation: "10万mのことです。" },
+                    { choice: "1,000km", explanation: "100万mのことです。" }
+                ],
+                correctAnswer: "1km"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "日本の伝統的な遊びで、紙を折って様々な形をつくる遊びは何？",
+                choicesData: [
+                    { choice: "剣玉", explanation: "木でできた玉と棒を使う遊びです。" },
+                    { choice: "だるま落とし", explanation: "積み重ねた木片を叩いて落とす遊びです。" },
+                    { choice: "折り紙", explanation: "紙を折って、動物や植物などの形をつくる遊びです。" },
+                    { choice: "お手玉", explanation: "小さな袋を投げて遊ぶ遊びです。" }
+                ],
+                correctAnswer: "折り紙"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "カレンダーで、1年は何ヶ月ある？",
+                choicesData: [
+                    { choice: "10ヶ月", explanation: "これは1年ではありません。" },
+                    { choice: "11ヶ月", explanation: "これも1年ではありません。" },
+                    { choice: "12ヶ月", explanation: "1年は12ヶ月あります。" },
+                    { choice: "13ヶ月", explanation: "これも1年ではありません。" }
+                ],
+                correctAnswer: "12ヶ月"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "体が緑色で、細長い体で草むらにいる昆虫は何？",
+                choicesData: [
+                    { choice: "カブトムシ", explanation: "黒くて大きな角を持つ昆虫です。" },
+                    { choice: "トンボ", explanation: "細長い体ですが、色や姿は異なります。" },
+                    { choice: "バッタ", explanation: "緑色や茶色で、ぴょんぴょん跳ねる昆虫です。" },
+                    { choice: "クワガタ", explanation: "大きなあごを持つ昆虫です。" }
+                ],
+                correctAnswer: "バッタ"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "10000円札に描かれている人物は誰？",
+                choicesData: [
+                    { choice: "福沢諭吉", explanation: "現在の10000円札に描かれている人物です。" },
+                    { choice: "野口英世", explanation: "現在の1000円札に描かれています。" },
+                    { choice: "夏目漱石", explanation: "古い1000円札に描かれていました。" },
+                    { choice: "聖徳太子", explanation: "古い10000円札など、さまざまな紙幣に描かれていました。" }
+                ],
+                correctAnswer: "福沢諭吉"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "10時30分から30分後、何時何分になる？",
+                choicesData: [
+                    { choice: "10時50分", explanation: "20分後の時間です。" },
+                    { choice: "11時00分", explanation: "10時30分に30分を足すと11時00分になります。" },
+                    { choice: "11時30分", explanation: "1時間後の時間です。" },
+                    { choice: "12時00分", explanation: "1時間30分後の時間です。" }
+                ],
+                correctAnswer: "11時00分"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "夏に鳴くことで有名な昆虫は？",
+                choicesData: [
+                    { choice: "スズメ", explanation: "鳥の一種で、夏以外にも鳴きます。" },
+                    { choice: "セミ", explanation: "夏になると「ミーンミーン」と大きな声で鳴く昆虫です。" },
+                    { choice: "ハチ", explanation: "夏によく見かけますが、大きな声で鳴くことはありません。" },
+                    { choice: "テントウムシ", explanation: "可愛らしい昆虫ですが、鳴くことはありません。" }
+                ],
+                correctAnswer: "セミ"
+            },
+            {
+                difficulty: "初級",
+                targetAudience: "小学生",
+                question: "日本で使われているお金の単位は何？",
+                choicesData: [
+                    { choice: "ドル", explanation: "アメリカなどで使われるお金の単位です。" },
+                    { choice: "ユーロ", explanation: "ヨーロッパの国々で使われるお金の単位です。" },
+                    { choice: "円", explanation: "日本で使われているお金の単位です。" },
+                    { choice: "ウォン", explanation: "韓国で使われるお金の単位です。" }
+                ],
+                correctAnswer: "円"
+            }
+        ];
+        // アプリの状態管理
+        let gameState = {
+            questionCount: null,
+            difficulty: null,
+            targetAudience: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            selectedQuestions: [],
+            incorrectlyAnsweredQuestions: [],
+            answered: false
+        };
+        // DOM要素の取得
+        const setupScreen = document.getElementById('setup-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        // セットアップ画面のイベントリスナー
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const type = this.dataset.type;
+                const value = this.dataset.value;
+
+                // 同じタイプの他のボタンの選択を解除
+                document.querySelectorAll(`[data-type="${type}"]`).forEach(b => {
+                    b.classList.remove('selected');
+                });
+
+                // 現在のボタンを選択
+                this.classList.add('selected');
+
+                // 状態を更新
+                gameState[type === 'questions' ? 'questionCount' : type === 'difficulty' ? 'difficulty' : 'targetAudience'] =
+                    type === 'questions' ? parseInt(value) : value;
+
+                // 開始ボタンの有効/無効を判定
+                updateStartButton();
+            });
+        });
+        function updateStartButton() {
+            if (gameState.questionCount && gameState.difficulty && gameState.targetAudience) {
+                startBtn.disabled = false;
+            } else {
+                startBtn.disabled = true;
+            }
+        }
+
+        // クイズ開始
+        startBtn.addEventListener('click', startQuiz);
+        function startQuiz() {
+            // 条件に合う問題を選択
+            let availableQuestions = quizzes.filter(q =>
+                q.difficulty === gameState.difficulty &&
+                q.targetAudience === gameState.targetAudience
+            );
+            // 問題が足りない場合は、同じ難易度の他の対象者の問題も含める
+            if (availableQuestions.length < gameState.questionCount) {
+                availableQuestions = quizzes.filter(q => q.difficulty === gameState.difficulty);
+            }
+
+            // それでも足りない場合は全問題から
+            if (availableQuestions.length < gameState.questionCount) {
+                availableQuestions = [...quizzes];
+            }
+
+            // 問題をシャッフルして必要な数だけ選択
+            gameState.selectedQuestions = shuffleArray(availableQuestions)
+                .slice(0, gameState.questionCount);
+
+            // 各問題の選択肢をシャッフルし、その順番を保存
+            gameState.selectedQuestions.forEach(question => {
+                question.shuffledChoicesData = shuffleArray([...question.choicesData]);
+            });
+
+            // 画面切り替え
+            setupScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            // 最初の問題を表示
+            displayQuestion();
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function displayQuestion() {
+            const currentQuestion = gameState.selectedQuestions[gameState.currentQuestionIndex];
+            // プログレスバー更新
+            const progress = ((gameState.currentQuestionIndex + 1) / gameState.questionCount) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+
+            // 問題番号更新
+            document.getElementById('question-number').textContent = `問題 ${gameState.currentQuestionIndex + 1}`;
+            document.getElementById('question-total').textContent = `/ ${gameState.questionCount}`;
+
+            // 問題文表示
+            document.getElementById('question').textContent = currentQuestion.question;
+            // 選択肢表示
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            // 保存しておいたシャッフル済みの選択肢データを使用
+            currentQuestion.shuffledChoicesData.forEach(item => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.textContent = item.choice;
+                button.addEventListener('click', () => selectAnswer(item.choice, button));
+                choicesContainer.appendChild(button);
+            });
+            // 解説とボタンを非表示
+            document.getElementById('explanation').classList.remove('show');
+            nextBtn.classList.remove('show');
+            gameState.answered = false;
+        }
+
+        function selectAnswer(selectedChoice, selectedButton) {
+            if (gameState.answered) return;
+            gameState.answered = true;
+            const currentQuestion = gameState.selectedQuestions[gameState.currentQuestionIndex];
+            const isCorrect = selectedChoice === currentQuestion.correctAnswer;
+
+            currentQuestion.userAnswer = selectedChoice; // ユーザーの回答を保存
+
+            if (isCorrect) {
+                gameState.score++;
+                selectedButton.classList.add('correct');
+            } else {
+                selectedButton.classList.add('incorrect');
+                // 間違えた問題を保存
+                gameState.incorrectlyAnsweredQuestions.push(currentQuestion);
+                // 正解の選択肢を強調
+                document.querySelectorAll('.choice-btn').forEach(btn => {
+                    if (btn.textContent === currentQuestion.correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // すべての選択肢を無効化
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // すべての選択肢の解説を表示
+            const explanationText = document.getElementById('explanation-text');
+            explanationText.innerHTML = ''; // 既存の解説をクリア
+            // シャッフルされた順番で解説を表示
+            currentQuestion.shuffledChoicesData.forEach(item => {
+                const p = document.createElement('p');
+                p.innerHTML = `<strong>${item.choice}</strong>: ${item.explanation}`;
+                explanationText.appendChild(p);
+            });
+            document.getElementById('explanation').classList.add('show');
+
+            // 次へボタンを表示
+            nextBtn.classList.add('show');
+        }
+
+        // 次の問題へ
+        nextBtn.addEventListener('click', () => {
+            gameState.currentQuestionIndex++;
+
+            if (gameState.currentQuestionIndex < gameState.questionCount) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            const scorePercentage = Math.round((gameState.score / gameState.questionCount) * 100);
+
+            document.getElementById('result-score').textContent =
+                `${gameState.score} / ${gameState.questionCount} 問正解！`;
+            let message = '';
+            if (scorePercentage >= 90) {
+                message = '素晴らしい結果です！🎉 あなたの知識は本当に豊富ですね。';
+            } else if (scorePercentage >= 70) {
+                message = 'とても良い結果です！👏 継続的な学習の成果が表れています。';
+            } else if (scorePercentage >= 50) {
+                message = '頑張りました！💪 もう少し学習を続ければ、さらに良い結果が期待できます。';
+            } else {
+                message = 'お疲れさまでした！📚 復習をして、もう一度挑戦してみましょう。';
+            }
+
+            document.getElementById('result-message').textContent = message;
+
+            // 間違えた問題があれば復習セクションを表示
+            if (gameState.incorrectlyAnsweredQuestions.length > 0) {
+                const reviewSection = document.getElementById('review-section');
+                reviewSection.classList.remove('hidden');
+
+                // 復習内容を生成
+                gameState.incorrectlyAnsweredQuestions.forEach((question, index) => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-item';
+
+                    const questionText = document.createElement('h4');
+                    questionText.textContent = `問題${index + 1}: ${question.question}`;
+                    reviewItem.appendChild(questionText);
+
+                    const explanationContainer = document.createElement('div');
+                    explanationContainer.className = 'review-explanation';
+
+                    // シャッフルされた順番で解説を表示
+                    question.shuffledChoicesData.forEach(item => {
+                        const p = document.createElement('p');
+                        let content = `<strong>${item.choice}</strong>: ${item.explanation}`;
+
+                        // 正解とユーザーの回答を強調
+                        if (item.choice === question.correctAnswer && item.choice === question.userAnswer) {
+                            content = `<strong><span class="correct-user-answer-text">${item.choice} (正解 / あなたの回答)</span></strong>: ${item.explanation}`;
+                        } else if (item.choice === question.correctAnswer) {
+                            content = `<strong><span class="correct-answer-text">${item.choice} (正解)</span></strong>: ${item.explanation}`;
+                        } else if (item.choice === question.userAnswer) {
+                            content = `<strong><span class="user-answer-text">${item.choice} (あなたの回答)</span></strong>: ${item.explanation}`;
+                        }
+
+                        p.innerHTML = content;
+                        explanationContainer.appendChild(p);
+                    });
+
+                    reviewItem.appendChild(explanationContainer);
+                    reviewSection.appendChild(reviewItem);
+                });
+            }
+        }
+
+        // リスタート
+        restartBtn.addEventListener('click', () => {
+            // 状態をリセット
+            gameState = {
+                questionCount: null,
+                difficulty: null,
+                targetAudience: null,
+                currentQuestionIndex: 0,
+                score: 0,
+                selectedQuestions: [],
+                incorrectlyAnsweredQuestions: [],
+                answered: false
+            };
+
+            // 選択状態をクリア
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.getElementById('review-section').innerHTML = '<h3>間違えた問題の復習</h3>';
+            document.getElementById('review-section').classList.add('hidden');
+            startBtn.disabled = true;
+
+            // 画面切り替え
+            resultScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+        });
+    </script>
+</body>
+
+</html>
